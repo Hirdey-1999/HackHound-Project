@@ -1,11 +1,12 @@
-from sqlalchemy.orm import relationship
-from sqlalchemy import Integer,Boolean,Column,ForeignKey,String,Float,ARRAY,ClauseList,Tuple
+from sqlalchemy import Column, Integer,String,ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import declarative_base
 
-from Database import Base
-
+Base = declarative_base()
 class User(Base):
     __tablename__ = "Userbase"
-    id = Column(Integer,primary_key=True,default=0)
+    id = Column(UUID(as_uuid=True), primary_key=True)
+    name = Column(String)
 
 class Restaurant(Base):
     __tablename__ = "Restaurant"
@@ -46,3 +47,10 @@ class Nutrition_level(Base):
 class cart(Base):
     __tablename__ = "Cart"
     id = Column(Integer,primary_key=True,index=True)
+
+class Account(Base):
+    """The Account class corresponds to the "accounts" database table.
+    """
+    __tablename__ = 'accounts'
+    id = Column(UUID(as_uuid=True), primary_key=True)
+    balance = Column(Integer)

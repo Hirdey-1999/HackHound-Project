@@ -1,27 +1,25 @@
-from typing import List
+
 from fastapi import Depends, FastAPI,HTTPException,Request
-from sqlalchemy.orm import Session
 from models import *
-from Database import session, engine
+from math import floor
+import random
+import uuid
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_cockroachdb import run_transaction
+
+from models import Account
 from twilio.rest import Client
 
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 
-# Dependency
-def get_db():
-    db = session()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @app.post('/order')
 async def order(session,info:Request):
     req_info = await info.json()
-    #store Order details of user
     print("working")
     obj = Order(
         id=req_info[2]
@@ -36,26 +34,20 @@ async def order(session,info:Request):
         body="New Order Recieved",
         to='whatsapp:' + no
     )
-
+    run_transaction(session,
+                    lambda s: create_accounts(s, 100))
 @app.get('/orderdetails/<id:int>')
 async def Orderdetails():
     #Show order details
     pass
-@app.post('/Users')
-async def Users(session,info:Request):
-    # update data remains
-    req_info = await info.json()
-    print("Data get")
-    obj = User(
-        id=0
-    )
-    session.add(obj)
-    return {
-        "status": "SUCCESS",
-        "data": req_info
-    }
-    # Use a breakpoint in the code line below to debug your script.
+def Users(session,n):
+    #create_user_item
 
+    a= uuid.uuid4()
+    # account_balance = floor(random.random() * 1_000_000)
+    userss = User(id=a,name="Aash")
+
+    session.add(userss)
 @app.patch('/OrderUpdates')
 async def Updates(session,info:Request):
     # update data remains
@@ -88,3 +80,32 @@ async def Updates(session,info:Request):
         "status": "SUCCESS",
         "data": req_info
     }
+    #
+
+def create_accounts(session, num):
+    """Create N new accounts with random account IDs and account balances.
+    """
+    print("Creating new accounts...")
+    new_accounts = []
+    while num > 0:
+        account_id = uuid.uuid4()
+        account_balance = floor(random.random()*1_000_000)
+        new_accounts.append(Account(id=account_id, balance=account_balance))
+        seen_account_ids.append(account_id)
+        print(f"Created new account with id {account_id} and balance {account_balance}.")
+        num = num - 1
+    session.add_all(new_accounts)
+
+if __name__ == '__main__':
+    # run_transaction(Users(0,session))
+    seen_account_ids = []
+
+    SQL_ALCHEMY_URL = ("postgresql://akash:QA7rCKUzX0PrPpmM4QRJpw@dour-snorter-2446.7s5.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full")
+
+    engine = create_engine(
+        SQL_ALCHEMY_URL.replace("postgresql://", "cockroachdb://")
+    )
+    run_transaction(sessionmaker(bind=engine),
+                    lambda s: create_accounts(s, 100))
+    run_transaction(sessionmaker(bind=engine),
+                    lambda s: Users(s, 100))
