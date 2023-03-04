@@ -40,14 +40,21 @@ async def order(session,info:Request):
 async def Orderdetails():
     #Show order details
     pass
-def Users(session,n):
+@app.post('/Users')
+def Users(session,info:Request):
     #create_user_item
+    req_info = info.json()
+    obj = User(
+        id=req_info['idd']
+    )
+    obj.add()
 
-    a= uuid.uuid4()
-    # account_balance = floor(random.random() * 1_000_000)
-    userss = User(id=a,name="Aash")
+    return {
+        "status": "SUCCESS",
+        "data": obj
+    }
+    # # Use a breakpoint in the code line below to debug your script.
 
-    session.add(userss)
 @app.patch('/OrderUpdates')
 async def Updates(session,info:Request):
     # update data remains
