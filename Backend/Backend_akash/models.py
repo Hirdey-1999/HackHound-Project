@@ -6,6 +6,7 @@ from Database import Base
 class User(Base):
     __tablename__ = "Userbase"
     id = Column(Integer,primary_key=True,index=True)
+    is_active = Column(Boolean,default=True)
     # All the table User Fields
     pass
 
@@ -24,7 +25,7 @@ class Menu(Base):
 class Order(Base):
     __tablename__ = "Orders"
     id = Column(Integer, primary_key=True, index=True)
-    users = Column(Integer , ForeignKey("User.id"))
+    users = Column(Integer , ForeignKey("Userbase.id"))
     # All the table User Fields
 
 class Nutrition_level(Base):
@@ -34,4 +35,6 @@ class Nutrition_level(Base):
     # All the table User Fields
 
 
-#QA7rCKUzX0PrPpmM4QRJpw
+class cart(Base):
+    __tablename__ = "Cart"
+    id = Column(Integer,primary_key=True,index=True)
