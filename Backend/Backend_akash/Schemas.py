@@ -1,32 +1,20 @@
-from typing import Optional,List
+from typing import List, Optional
+
 from pydantic import BaseModel
 
-class OrderBase(BaseModel):
-    id: int
+
+class ItemBase(BaseModel):
+    id: str
+    #description: Optional[str] = None
 
 
-class OrderCreate(OrderBase):
+class ItemCreate(ItemBase):
     pass
 
 
-class Order(OrderBase):
+class Item(ItemBase):
     id: int
-    users: int
-
-    class Config:
-        orm_mode = True
-
-class UserBase(BaseModel):
-    email: str
-
-
-class UserCreate(UserBase):
-    password: str
-
-
-class User(UserBase):
-    id: int
-    is_active: bool
+    #owner_id: int
 
     class Config:
         orm_mode = True

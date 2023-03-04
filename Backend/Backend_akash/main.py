@@ -18,18 +18,16 @@ def get_db():
     finally:
         db.close()
 
-@app.post('/payments')
-async def payment():
-    #Payment gateway endpoint
-    pass
 @app.post('/order')
 async def order(session,info:Request):
     req_info = await info.json()
     #store Order details of user
+    print("working")
     obj = Order(
         id=req_info[2]
     )
     session.add(obj)
+    print("Added")
     client = Client('AC650ee5c9f0a1d51c072cd9c6ad024d75', 'f503be39f9c13638fdc0d29ae7fba7ba')
     no = '+919910838498'
     # Restaurant number
@@ -43,15 +41,28 @@ async def order(session,info:Request):
 async def Orderdetails():
     #Show order details
     pass
+@app.post('/Users')
+async def Users(session,info:Request):
+    # update data remains
+    req_info = await info.json()
+    print("Data get")
+    obj = User(
+        id=0
+    )
+    session.add(obj)
+    return {
+        "status": "SUCCESS",
+        "data": req_info
+    }
+    # Use a breakpoint in the code line below to debug your script.
 
 @app.patch('/OrderUpdates')
 async def Updates(session,info:Request):
     # update data remains
     req_info = await info.json()
     # Use a breakpoint in the code line below to debug your script.
-    if req_info['Processing']:
+    if req_info['status']=='Processing':
         client = Client('AC650ee5c9f0a1d51c072cd9c6ad024d75', 'f503be39f9c13638fdc0d29ae7fba7ba')
-        #msg = req_info['first_name'] + '\n' + req_info['last_name'] + '\n' + req_info['lat'] + '\n' + req_info['long']
         no = '+919910838498'
         # customer number
         message = client.messages.create(
@@ -59,7 +70,7 @@ async def Updates(session,info:Request):
             body="Order Under Processing",
             to='whatsapp:' + no
         )
-    if req_info['Completed']:
+    if req_info['status']=='Completed':
         client = Client('AC650ee5c9f0a1d51c072cd9c6ad024d75', 'f503be39f9c13638fdc0d29ae7fba7ba')
         # msg = req_info['first_name'] + '\n' + req_info['last_name'] + '\n' + req_info['lat'] + '\n' + req_info['long']
         no = '+919910838498'
@@ -69,9 +80,11 @@ async def Updates(session,info:Request):
             body="Your order has been cooked",
             to='whatsapp:' + no
         )
+    obj = Order(
+        status=req_info['status']
+    )
+    session.copy(obj)
     return {
         "status": "SUCCESS",
         "data": req_info
     }
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
